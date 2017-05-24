@@ -1,0 +1,8 @@
+[package]
+name = "mutt-maildirs"
+version = "0.1.0"
+authors = ["David O'Rourke <david.orourke@gmail.com>"]
+
+[dependencies]
+getopts = "0.2"
+walkdir = "1"

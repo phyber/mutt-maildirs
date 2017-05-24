@@ -85,11 +85,10 @@ fn maildir_path(base: &Path, path: &Path) -> PathBuf {
     }
 }
 
-fn list_maildirs(
-    base: &str,
-    initial: &Vec<String>,
-    excluded: &Vec<String>
-) -> Vec<PathBuf> {
+fn list_maildirs(base: &str,
+                 initial: &Vec<String>,
+                 excluded: &Vec<String>)
+                 -> Vec<PathBuf> {
     let base = expand_path(&base);
 
     // Filter the Maildir into what we're really after.
@@ -119,8 +118,7 @@ fn list_maildirs(
         // maildir or not.
         if is_initial(&maildir, &initial) {
             found_initial.push(maildir.clone());
-        }
-        else {
+        } else {
             maildirs.push(maildir.clone());
         }
     }
@@ -184,7 +182,8 @@ fn main() {
     // .. wrap each one with the correct formatting for mutt.
     // .. collect the map output into a vector of strings
     // .. join that vector into a single string with entries seperated by space.
-    let output = maildirs.iter()
+    let output = maildirs
+        .iter()
         .map(|m| format!("+'{}'", m.display()))
         .collect::<Vec<String>>()
         .join(" ");

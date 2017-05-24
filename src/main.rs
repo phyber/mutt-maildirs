@@ -5,7 +5,6 @@ extern crate getopts;
 extern crate walkdir;
 
 use std::env;
-use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 use getopts::Options;
 use walkdir::{DirEntry, WalkDir, WalkDirIterator};
@@ -60,9 +59,8 @@ fn is_cur(entry: &DirEntry) -> bool {
 }
 
 // Filter excluded maildirs
-// XXX: Feels like there should be a way to avoid OsStr::new here.
 fn is_excluded(entry: &PathBuf, excluded: &Vec<String>) -> bool {
-    excluded.iter().any(|x| OsStr::new(x) == entry)
+    excluded.iter().any(|x| Path::new(x) == entry)
 }
 
 // Checks if a maildir was listed as an initial maildir.

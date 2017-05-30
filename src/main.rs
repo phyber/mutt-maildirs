@@ -55,13 +55,13 @@ fn is_cur(entry: &DirEntry) -> bool {
 }
 
 // Filter excluded maildirs
-fn is_excluded(entry: &PathBuf, excluded: &Vec<String>) -> bool {
-    excluded.iter().any(|x| Path::new(x) == entry)
+fn is_excluded(entry: &PathBuf, excluded: &Vec<PathBuf>) -> bool {
+    excluded.contains(entry)
 }
 
 // Checks if a maildir was listed as an initial maildir.
-fn is_initial(maildir: &PathBuf, initial: &Vec<String>) -> bool {
-    initial.iter().any(|x| Path::new(x) == maildir)
+fn is_initial(maildir: &PathBuf, initial: &Vec<PathBuf>) -> bool {
+    initial.contains(maildir)
 }
 
 fn maildir_path(base: &Path, path: &Path) -> PathBuf {
@@ -80,8 +80,8 @@ fn maildir_path(base: &Path, path: &Path) -> PathBuf {
 }
 
 fn list_maildirs(base: &str,
-                 initial: &Vec<String>,
-                 excluded: &Vec<String>)
+                 initial: &Vec<PathBuf>,
+                 excluded: &Vec<PathBuf>)
                  -> Vec<PathBuf> {
     let base = expand_path(&base);
 
@@ -177,14 +177,15 @@ fn main() {
         .values_of("initial")
         .map_or(vec![], |x| x.collect())
         .into_iter()
-        .map(String::from)
-        .collect::<Vec<String>>();
+        .map(PathBuf::from)
+        .collect::<Vec<PathBuf>>();
+
     let excludes = matches
         .values_of("exclude")
         .map_or(vec![], |x| x.collect())
         .into_iter()
-        .map(String::from)
-        .collect::<Vec<String>>();
+        .map(PathBuf::from)
+        .collect::<Vec<PathBuf>>();
 
     // Unwrap here is safe since base is a required argument.
     let maildir_base = matches.value_of("base").unwrap();

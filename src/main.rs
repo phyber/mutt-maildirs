@@ -1,21 +1,17 @@
 /*
  * list-maildirs
  */
-extern crate getopts;
+#[macro_use]
+extern crate clap;
 extern crate walkdir;
 
+use clap::{App, Arg};
 use std::env;
 use std::path::{Path, PathBuf};
-use getopts::Options;
 use walkdir::{DirEntry, WalkDir, WalkDirIterator};
 
 const TILDE: &'static str = "~";
 const TILDE_SLASH: &'static str = "~/";
-
-fn usage(program: &str, opts: Options) {
-    let brief = format!("Usage: {} [options]", program);
-    print!("{}", opts.usage(&brief));
-}
 
 // Crude ~ -> $HOME expansion.
 // Can possibly use String.replacen here in the future
@@ -146,34 +142,55 @@ fn list_maildirs(base: &str,
 }
 
 fn main() {
-    let args: Vec<String> = env::args().collect();
+    let matches = App::new("thing")
+        .version(crate_version!())
+        .author(crate_authors!())
+        .about(crate_description!())
+        .arg(Arg::with_name("base")
+             .short("b")
+             .long("base")
+             .value_name("MAILDIR")
+             .help("Base directory of the Maildir to sort")
+             .takes_value(true)
+             .required(true))
+        .arg(Arg::with_name("initial")
+             .short("i")
+             .long("initial")
+             .value_name("INITIAL")
+             .help("Maildirs to be sorted first")
+             .takes_value(true)
+             .multiple(true))
+        .arg(Arg::with_name("exclude")
+             .short("e")
+             .long("exclude")
+             .value_name("EXCLUDE")
+             .help("Maildirs to exclude from list")
+             .takes_value(true)
+             .multiple(true))
+        .arg(Arg::with_name("verbose")
+             .short("v")
+             .long("verbose")
+             .help("Set verbose mode"))
+        .get_matches();
 
-    let mut opts = Options::new();
-    opts.optopt("b", "base", "set base directory", "BASEDIR");
-    opts.optmulti("e", "exclude", "exclude maildir", "EXCLUDE");
-    opts.optmulti("i", "initial", "initial maildirs", "INITIAL");
-    opts.optflag("v", "verbose", "verbose mode");
-    opts.optflag("h", "help", "display help menu");
+    let initial = matches
+        .values_of("initial")
+        .map_or(vec![], |x| x.collect())
+        .into_iter()
+        .map(String::from)
+        .collect::<Vec<String>>();
+    let excludes = matches
+        .values_of("exclude")
+        .map_or(vec![], |x| x.collect())
+        .into_iter()
+        .map(String::from)
+        .collect::<Vec<String>>();
 
-    let matches = match opts.parse(&args[1..]) {
-        Ok(m) => m,
-        Err(f) => panic!(f.to_string()),
-    };
-
-    // Print help if required.
-    if matches.opt_present("h") {
-        usage(&args[0], opts);
-        return;
-    }
-
-    let initial = matches.opt_strs("i");
-    let excludes = matches.opt_strs("e");
+    // Unwrap here is safe since base is a required argument.
+    let maildir_base = matches.value_of("base").unwrap();
 
     // Get mail directory list.
-    let maildirs = match matches.opt_str("b") {
-        Some(x) => list_maildirs(&x, &initial, &excludes),
-        None => panic!("Supply a basedir"),
-    };
+    let maildirs = list_maildirs(&maildir_base, &initial, &excludes);
 
     // Finally generate the output.
     // Iterate over the maildirs

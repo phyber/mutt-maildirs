@@ -173,19 +173,15 @@ fn main() {
              .help("Set verbose mode"))
         .get_matches();
 
-    let initial = matches
-        .values_of("initial")
-        .map_or(vec![], |x| x.collect())
-        .into_iter()
-        .map(PathBuf::from)
-        .collect::<Vec<PathBuf>>();
+    let initial = match matches.values_of("initial") {
+        None    => vec![],
+        Some(x) => x.map(PathBuf::from).collect::<Vec<PathBuf>>(),
+    };
 
-    let excludes = matches
-        .values_of("exclude")
-        .map_or(vec![], |x| x.collect())
-        .into_iter()
-        .map(PathBuf::from)
-        .collect::<Vec<PathBuf>>();
+    let excludes = match matches.values_of("exclude") {
+        None    => vec![],
+        Some(x) => x.map(PathBuf::from).collect::<Vec<PathBuf>>(),
+    };
 
     // Unwrap here is safe since base is a required argument.
     let maildir_base = matches.value_of("base").unwrap();

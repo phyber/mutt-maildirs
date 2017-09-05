@@ -35,8 +35,8 @@ fn expand_path(path: &str) -> PathBuf {
 
     // Otherwise, continue and replace the ~
     let home = match env::home_dir() {
+        None       => panic!("Could not get your home dir."),
         Some(path) => path,
-        None => panic!("Could not get your home dir."),
     };
 
     let pathtmp = &path[cut_len..];
@@ -68,14 +68,14 @@ fn maildir_path(base: &Path, path: &Path) -> PathBuf {
     // Attempt to get the parent of the path we were given.
     // If we're successful, we strip the base prefix from it.
     let maildir = match path.parent() {
+        None    => panic!("No parent directory for {:?}", path),
         Some(x) => x.strip_prefix(&base),
-        None => panic!("No parent directory for {:?}", path),
     };
 
     // If stripping the base prefix was successful, return the maildir path.
     match maildir {
-        Ok(m) => m.to_owned(),
         Err(e) => panic!("{}", e),
+        Ok(m)  => m.to_owned(),
     }
 }
 
@@ -95,9 +95,9 @@ fn list_maildirs(base: &str,
     // .. finally collect the vector of PathBufs
     let dirs = WalkDir::new(&base)
         .into_iter()
-        .filter_entry(|e| is_dir(e))
+        .filter_entry(is_dir)
         .filter_map(Result::ok)
-        .filter(|e| is_cur(e))
+        .filter(is_cur)
         .map(|e| maildir_path(&base, e.path()))
         .filter(|e| !is_excluded(e, excluded))
         .collect::<Vec<PathBuf>>();
@@ -142,7 +142,7 @@ fn list_maildirs(base: &str,
 }
 
 fn main() {
-    let matches = App::new("thing")
+    let matches = App::new("mutt-maildirs")
         .version(crate_version!())
         .author(crate_authors!())
         .about(crate_description!())

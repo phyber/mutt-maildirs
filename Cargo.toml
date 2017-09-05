@@ -5,4 +5,5 @@ authors = ["David O'Rourke <david.orourke@gmail.com>"]
 
 [dependencies]
 clap = "2"
+error-chain = "0.10"
 walkdir = "1"

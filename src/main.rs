@@ -135,6 +135,7 @@ fn list_maildirs(base: &str,
     // Sort maildirs that aren't the initial bunch.
     maildirs.sort();
 
+    // Allocate a new vector and add the initial order and maildirs to it.
     let mut all = Vec::with_capacity(initial_order.len() + maildirs.len());
     all.extend(initial_order);
     all.extend(maildirs);
